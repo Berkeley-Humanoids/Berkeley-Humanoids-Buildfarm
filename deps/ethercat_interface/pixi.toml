@@ -19,9 +19,12 @@ distro = "jazzy"
 #
 # recipes/libethercat builds libethercat, and packages.txt builds it first.
 #
-# The upstream hardcoded ETHERLAB_DIR=/usr/local/etherlab needs no patch.
-# conda puts $PREFIX/include on the command line with -isystem, and
-# find_library() falls back to $PREFIX/lib.
+# The upstream hardcoded ETHERLAB_DIR=/usr/local/etherlab still needs a patch.
+# These dependencies make the package compile, because conda puts
+# $PREFIX/include on the command line with -isystem. They do not stop CMake
+# from exporting /usr/local/etherlab/include in INTERFACE_INCLUDE_DIRECTORIES,
+# which breaks every consumer. packages.txt keeps these packages commented out
+# until the fork is patched.
 [package.host-dependencies]
 libethercat = "*"
 ros-jazzy-ament-cmake-ros = "*"

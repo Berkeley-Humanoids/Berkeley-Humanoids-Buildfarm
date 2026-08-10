@@ -7,16 +7,31 @@
 # everything that it needs.
 
 # --- EtherCAT hardware ---
-# ethercat_manager is left out on purpose, and it has no manifest. Its source
-# calls ::close without an include of <unistd.h>, so it does not compile. No
-# product uses it.
+# libethercat builds cleanly, and the ethercat_* packages will need it.
 recipes/libethercat
-deps/ethercat_interface
-deps/ethercat_msgs
-deps/ethercat_driver
-deps/ethercat_generic_slave
-deps/ethercat_generic_cia402_drive
-deps/ethercat_driver_ros2
+
+# The ethercat_* ROS packages are NOT built yet. Our fork hardcodes
+# ETHERLAB_DIR=/usr/local/etherlab, and it puts that path into the
+# INTERFACE_INCLUDE_DIRECTORIES of its exported CMake targets. A consumer then
+# stops at the generate step with "includes non-existent path
+# /usr/local/etherlab/include".
+#
+# A workstation that has EtherLab installed hides this, because the path exists
+# there. Do not trust a local build of these packages. CI is the honest test.
+#
+# To clear it, patch Berkeley-Humanoids/ethercat_driver_ros2 to find ecrt.h and
+# libethercat under $PREFIX. Then move the pin in the manifests, and uncomment
+# these lines.
+#
+# ethercat_manager stays out for a second reason, and it has no manifest. Its
+# source calls ::close without an include of <unistd.h>, so it does not compile.
+# No product uses it.
+# deps/ethercat_interface
+# deps/ethercat_msgs
+# deps/ethercat_driver
+# deps/ethercat_generic_slave
+# deps/ethercat_generic_cia402_drive
+# deps/ethercat_driver_ros2
 
 # --- gamepad teleoperation ---
 deps/teleop_tools_msgs
