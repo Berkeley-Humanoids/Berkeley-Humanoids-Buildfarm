@@ -1,0 +1,29 @@
+# Workspace manifest for the Berkeley Humanoids buildfarm. See README.md.
+[workspace]
+name = "berkeley-humanoids-buildfarm"
+channels = [
+  # scripts/build.sh indexes each package that it builds into this directory.
+  # The next package in packages.txt then builds against it. `pixi build` has no
+  # --channel option, so this is the only way to build a chain in one run.
+  #
+  # The directory is committed with an empty index, because pixi reads every
+  # channel before it runs any task.
+  "./local-channel",
+  "https://prefix.dev/berkeley-humanoids",
+  # Do not add prefix.dev/pixi-build-backends. Its nightly builds outrank the
+  # conda-forge releases, and a nightly backend broke the build API once.
+  "https://prefix.dev/robostack-jazzy",
+  "https://prefix.dev/conda-forge",
+]
+platforms = ["linux-64", "linux-aarch64"]
+preview = ["pixi-build"]
+
+[dependencies]
+rattler-build = "*"
+conda-index = "*"
+
+# The packaging verb is `package`, never `build`. The `build` verb belongs to
+# colcon in the development workspaces.
+[tasks]
+package = { cmd = "bash scripts/build.sh", description = "Build every package in packages.txt into ./output as .conda (argument: platform, default linux-64)" }
+publish = { cmd = "bash scripts/publish.sh", description = "Upload ./output/*.conda to the prefix.dev channel (CHANNEL to override, OIDC in CI or PREFIX_API_KEY)" }

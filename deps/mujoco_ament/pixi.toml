@@ -1,0 +1,17 @@
+[package.build.source]
+git = "https://github.com/qiayuanl/mujoco_ament.git"
+rev = "60ef6c463b9c1cf004537e18fc881e7ed4d159ce"  # branch: master
+
+[package.build.backend]
+name = "pixi-build-ros"
+version = "==0.5.0" # Keep this pin. Move it with the pixi pin in the workflow.
+channels = ["https://prefix.dev/conda-forge"]
+
+[package.build.config]
+distro = "jazzy"
+
+# rattler-build relinks the bundled libmujoco.so. It looks for patchelf in the
+# build environment. Without this dependency, the build fails at the packaging
+# step with "failed to find patchelf".
+[package.build-dependencies]
+patchelf = "*"

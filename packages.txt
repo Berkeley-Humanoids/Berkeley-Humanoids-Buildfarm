@@ -1,0 +1,36 @@
+# What the buildfarm builds. One repository-root-relative path per line. A path
+# holds either a pixi.toml (a ROS package) or a recipe.yaml. See README.md.
+#
+# ORDER MATTERS. scripts/build.sh indexes each package that it builds into
+# ./local-channel. The workspace reads that channel first. A package can
+# therefore build only against the packages above it. Put each package after
+# everything that it needs.
+
+# --- EtherCAT hardware ---
+# ethercat_manager is left out on purpose, and it has no manifest. Its source
+# calls ::close without an include of <unistd.h>, so it does not compile. No
+# product uses it.
+recipes/libethercat
+deps/ethercat_interface
+deps/ethercat_msgs
+deps/ethercat_driver
+deps/ethercat_generic_slave
+deps/ethercat_generic_cia402_drive
+deps/ethercat_driver_ros2
+
+# --- gamepad teleoperation ---
+deps/teleop_tools_msgs
+deps/joy_teleop
+
+# --- MuJoCo simulation ---
+# mujoco_ament downloads the MuJoCo archive during the build, so the build needs
+# network access. rattler-build permits this.
+deps/mujoco_ament
+deps/mujoco_sim_ros2
+deps/mujoco_ros2_control
+
+# --- robot description ---
+# TEMPORARY HOME. We author lite_description. By the rule in README.md it
+# belongs to Berkeley-Humanoids/Lite-Description. It stays here until that
+# repository can publish it. A move before then would leave it unpublished.
+deps/lite_description

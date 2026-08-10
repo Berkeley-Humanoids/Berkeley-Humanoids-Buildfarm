@@ -1,0 +1,82 @@
+# Builds packages.txt into ros-jazzy-* conda packages and uploads them to
+# prefix.dev. See README.md.
+#
+# There is no version tag. Every package keeps its own upstream version, so this
+# repository has no release of its own.
+name: build-jazzy
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 10 * * *'
+  push:
+    branches: [main]
+    paths:
+      - deps/**
+      - packages.txt
+      - pixi.toml
+      - pixi.lock
+
+jobs:
+  # Skip the nightly rebuild when RoboStack-jazzy has not changed. The cache key
+  # holds a hash of the repodata header, so an unchanged channel hits the cache.
+  check:
+    runs-on: ubuntu-latest
+    outputs:
+      skip: ${{ steps.cache.outputs.cache-hit }}
+    steps:
+      - id: hash
+        if: github.event_name == 'schedule'
+        run: |
+          H=$(curl -sIL https://prefix.dev/robostack-jazzy/linux-64/repodata.json \
+              | grep -i '^last-modified:' | sha256sum | cut -d' ' -f1)
+          echo "h=$H" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@v4
+        if: github.event_name == 'schedule'
+        id: cache
+        with:
+          path: .ros_release_marker
+          key: robostack-jazzy-${{ steps.hash.outputs.h }}
+      - if: github.event_name == 'schedule' && steps.cache.outputs.cache-hit != 'true'
+        run: echo "${{ steps.hash.outputs.h }}" > .ros_release_marker
+
+  build:
+    needs: check
+    if: needs.check.outputs.skip != 'true'
+    permissions:
+      id-token: write # prefix.dev OIDC trusted publishing
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { arch: linux-64, runner: ubuntu-24.04 }
+          - { arch: linux-aarch64, runner: ubuntu-24.04-arm } # native, to avoid cross-compiling
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: prefix-dev/setup-pixi@v0
+        with:
+          manifest-path: pixi.toml
+          # Keep this pin. setup-pixi takes the latest version by default, and a
+          # later pixi changed how `pixi build --path` reads a manifest on
+          # arm64 while linux-64 stayed green. Move it together with the
+          # pixi-build-ros pin (==0.5.0) in the deps manifests.
+          pixi-version: v0.70.1
+
+      - name: Build the packages
+        run: pixi run package ${{ matrix.arch }}
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: conda-${{ matrix.arch }}
+          path: output/**/*.conda
+
+      # Publish from main only. A pull request builds, but uploads nothing.
+      - name: Upload to prefix.dev
+        if: github.ref == 'refs/heads/main'
+        env:
+          CHANNEL: berkeley-humanoids
+          PREFIX_API_KEY: ${{ secrets.PREFIX_API_KEY }}
+        run: pixi run publish

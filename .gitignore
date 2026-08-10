@@ -1,0 +1,11 @@
+/output/
+/.pixi/
+/test-channel/
+.ros_release_marker
+
+# Only the empty index is committed. pixi reads every channel before it runs any
+# task, so local-channel must exist on a fresh clone. build.sh fills it during a
+# build, and empties it afterwards. A failed build can leave packages behind.
+/local-channel/**
+!/local-channel/*/
+!/local-channel/*/repodata.json

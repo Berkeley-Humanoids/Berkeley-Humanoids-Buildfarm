@@ -1,0 +1,12 @@
+[package.build.source]
+git = "https://github.com/ros-teleop/teleop_tools.git"
+rev = "99d16d74c16e044a7cf10cb3300579eb27cca807"  # branch: master
+subdirectory = "teleop_tools_msgs"
+
+[package.build.backend]
+name = "pixi-build-ros"
+version = "==0.5.0" # Keep this pin. Move it with the pixi pin in the workflow.
+channels = ["https://prefix.dev/conda-forge"]
+
+[package.build.config]
+distro = "jazzy"

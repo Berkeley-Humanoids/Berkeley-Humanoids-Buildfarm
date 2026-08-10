@@ -1,0 +1,11 @@
+[package.build.source]
+git = "https://github.com/Berkeley-Humanoids/mujoco_sim_ros2.git"
+branch = "main" # Our fork. Raise its package.xml version when you patch it.
+
+[package.build.backend]
+name = "pixi-build-ros"
+version = "==0.5.0" # Keep this pin. Move it with the pixi pin in the workflow.
+channels = ["https://prefix.dev/conda-forge"]
+
+[package.build.config]
+distro = "jazzy"

@@ -1,0 +1,33 @@
+[package.build.source]
+git = "https://github.com/Berkeley-Humanoids/ethercat_driver_ros2.git"
+rev = "2fd7e30535cda6ef477a1eafe1cd48666cbd662e"  # branch: bar/prime-patches
+subdirectory = "ethercat_interface"
+
+[package.build.backend]
+name = "pixi-build-ros"
+version = "==0.5.0" # Keep this pin. Move it with the pixi pin in the workflow.
+channels = ["https://prefix.dev/conda-forge"]
+
+[package.build.config]
+distro = "jazzy"
+
+# CMake finds libethercat with find_library(). It finds ament_cmake_ros and
+# rclcpp with find_package(). package.xml declares none of them.
+#
+# colcon hides this gap, because colcon supplies a full ROS environment. A
+# conda build environment holds only the declared dependencies.
+#
+# recipes/libethercat builds libethercat, and packages.txt builds it first.
+#
+# The upstream hardcoded ETHERLAB_DIR=/usr/local/etherlab needs no patch.
+# conda puts $PREFIX/include on the command line with -isystem, and
+# find_library() falls back to $PREFIX/lib.
+[package.host-dependencies]
+libethercat = "*"
+ros-jazzy-ament-cmake-ros = "*"
+ros-jazzy-rclcpp = "*"
+
+# The published binary loads libethercat.so.1 at run time.
+[package.run-dependencies]
+libethercat = "*"
+ros-jazzy-rclcpp = "*"

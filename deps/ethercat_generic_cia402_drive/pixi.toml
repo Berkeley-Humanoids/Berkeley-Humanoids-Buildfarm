@@ -1,0 +1,12 @@
+[package.build.source]
+git = "https://github.com/Berkeley-Humanoids/ethercat_driver_ros2.git"
+rev = "2fd7e30535cda6ef477a1eafe1cd48666cbd662e"  # branch: bar/prime-patches
+subdirectory = "ethercat_generic_plugins/ethercat_generic_cia402_drive"
+
+[package.build.backend]
+name = "pixi-build-ros"
+version = "==0.5.0" # Keep this pin. Move it with the pixi pin in the workflow.
+channels = ["https://prefix.dev/conda-forge"]
+
+[package.build.config]
+distro = "jazzy"

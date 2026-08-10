@@ -1,0 +1,70 @@
+# IgH EtherLab EtherCAT master, userspace library only (libethercat + ecrt.h).
+# The ethercat_* packages link against it. packages.txt builds it first.
+#
+# --disable-kernel keeps the userspace library only. The kernel module and the
+# master daemon are specific to a real-time kernel, so this recipe does not
+# package them. Install those on each robot.
+
+schema_version: 1
+
+context:
+  # The stable-1.5 branch reports master version 1.5.2 at runtime.
+  version: "1.5.2"
+
+package:
+  name: libethercat
+  version: ${{ version }}
+
+source:
+  # Use `branch:`, not `rev:`. `rev:` expects a commit SHA, and a branch name
+  # there leaves an empty work tree. Pin a tag or a SHA if stable-1.5 starts to
+  # drift.
+  - git: https://gitlab.com/etherlab.org/ethercat.git
+    branch: stable-1.5
+
+build:
+  number: 0
+  script:
+    # autoupdate modernizes the old configure.ac for a newer autoconf. Tolerate
+    # its obsolete-macro warnings.
+    - autoupdate || true
+    - ./bootstrap
+    - ./configure --prefix=${PREFIX} --host=${HOST} --build=${BUILD} --disable-kernel
+    - make -j${CPU_COUNT}
+    # EtherLab installs ethercat.service to an ABSOLUTE /usr/lib/systemd/system.
+    # That path is outside the prefix, and it breaks a relocatable conda package.
+    # Redirect it.
+    - make install systemdsystemunitdir=${PREFIX}/lib/systemd/system
+
+requirements:
+  build:
+    - ${{ compiler('c') }}
+    # The tree also builds the `ethercat` CLI, which is C++, so g++ is needed
+    # even though the shipped library is C.
+    - ${{ compiler('cxx') }}
+    - make
+    - autoconf
+    - automake
+    - libtool
+    - pkg-config
+
+tests:
+  - package_contents:
+      lib:
+        - ethercat
+      include:
+        - ecrt.h
+
+about:
+  homepage: https://etherlab.org/en/ethercat/
+  summary: IgH EtherLab EtherCAT master userspace library (libethercat + ecrt.h)
+  description: |
+    The application-interface library of the IgH EtherLab EtherCAT master.
+    Provides libethercat and ecrt.h, which ethercat_driver_ros2 links against.
+    Userspace only (no kernel module / master daemon).
+  # The master is GPL-2.0. The userspace application library is LGPL-2.1, so
+  # applications may link it. CONFIRM this against the upstream COPYING.LESSER
+  # before publishing.
+  license: LGPL-2.1-or-later
+  license_file: COPYING.LESSER
+  repository: https://gitlab.com/etherlab.org/ethercat
