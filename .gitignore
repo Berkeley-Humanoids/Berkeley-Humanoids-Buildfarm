@@ -1,4 +1,7 @@
 /output/
+# pixi records ./local-channel as an absolute path, so the lock is valid on one
+# machine only. The tool versions in pixi.toml are pinned instead.
+/pixi.lock
 /.pixi/
 /test-channel/
 .ros_release_marker

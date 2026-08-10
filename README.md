@@ -119,7 +119,6 @@ manifest. Two cases occur:
 ```
 Berkeley-Humanoids-Buildfarm/
 ├── pixi.toml             # the build workspace: channels, dependencies, tasks
-├── pixi.lock             # committed, for a reproducible toolchain
 ├── packages.txt          # what the buildfarm builds, in dependency order
 ├── local-channel/        # committed empty index, filled during a build
 ├── deps/                 # one manifest per package, each naming a git source
@@ -165,6 +164,11 @@ directory has to exist and carry a valid `repodata.json` on a fresh clone. The
 `pixi` is pinned to `v0.70.1` in the workflow. The `pixi-build-ros` backend is
 pinned to `==0.5.0` in every manifest. A floating version pulled a nightly
 backend that broke the build API. Change the two pins together.
+
+`pixi.lock` is **not** committed. pixi records the `./local-channel` entry as an
+absolute path, so a lock file is valid on the machine that wrote it and nowhere
+else, and `pixi install --locked` fails everywhere else. `rattler-build` and
+`conda-index` carry explicit version pins in `pixi.toml` instead.
 
 `pixi build` is deprecated in favour of `pixi publish`, but it works in the
 pinned version. Change it deliberately, and test both architectures.

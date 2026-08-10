@@ -18,9 +18,13 @@ channels = [
 platforms = ["linux-64", "linux-aarch64"]
 preview = ["pixi-build"]
 
+# These two are pinned instead of locked. pixi.lock cannot be committed here,
+# because pixi records the ./local-channel entry above as an absolute path, which
+# differs on every machine and makes `pixi install --locked` fail. Explicit pins
+# give the same determinism, and they work everywhere.
 [dependencies]
-rattler-build = "*"
-conda-index = "*"
+rattler-build = "0.72.*"
+conda-index = "0.12.*"
 
 # The packaging verb is `package`, never `build`. The `build` verb belongs to
 # colcon in the development workspaces.
