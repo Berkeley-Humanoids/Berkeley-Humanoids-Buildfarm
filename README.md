@@ -6,7 +6,7 @@ uploads them to the [prefix.dev](https://prefix.dev) channel
 `pixi add`. They do not clone or build these sources.
 
 A conda package has the name `ros-jazzy-<package name with dashes>`. For
-example, `joy_teleop` becomes `ros-jazzy-joy-teleop`.
+example, `mujoco_sim_ros2` becomes `ros-jazzy-mujoco-sim-ros2`.
 
 The build chain is
 [`pixi-build-ros`](https://pixi.prefix.dev/latest/build/backends/pixi-build-ros/)
@@ -22,17 +22,16 @@ packages.
 |---|---|
 | `humanoid_*`, `specialist_*`, `pianist_*` | the product repository that holds it |
 | `lite_description`, and other descriptions we author | the description repository that holds it |
-| `teleop_tools`, `mujoco_*`, `ethercat_*`, `libethercat` | **this repository** |
+| `mujoco_*`, `ethercat_*`, `libethercat` | **this repository** |
 
 The rule exists because a conda package name has no owner. If two repositories
 both publish `ros-jazzy-mujoco-sim-ros2`, the upload skips whichever arrives
 second and reports success, so one repository silently builds against the
 other's commit. One publisher per package name prevents this.
 
-Prefer upstreaming over adding a package here. `teleop_tools` is an official
-`ros-teleop` package that RoboStack has not picked up. A RoboStack recipe would
-serve everybody, and would remove it from this list. Keep this repository for what
-RoboStack will not take.
+Prefer upstreaming over adding a package here, and check RoboStack first. Keep
+this repository for what RoboStack will not take, and drop a package from it once
+RoboStack takes it.
 
 > **`lite_description` is here temporarily.** We author it, so it belongs to
 > `Berkeley-Humanoids/Lite-Description`. It stays here until that repository has
@@ -46,9 +45,8 @@ source of the package:
 
 ```toml
 [package.build.source]
-git = "https://github.com/ros-teleop/teleop_tools.git"
-rev = "99d16d74c16e044a7cf10cb3300579eb27cca807"
-subdirectory = "joy_teleop"
+git = "https://github.com/Berkeley-Humanoids/mujoco_sim_ros2.git"
+branch = "main"
 
 [package.build.backend]
 name = "pixi-build-ros"
@@ -94,7 +92,7 @@ pixi exec --spec conda-index -- python -m conda_index test-channel
 pixi init /tmp/consume -c "file://$PWD/test-channel" \
                        -c https://prefix.dev/robostack-jazzy \
                        -c https://prefix.dev/conda-forge
-cd /tmp/consume && pixi add ros-jazzy-joy-teleop
+cd /tmp/consume && pixi add ros-jazzy-mujoco-sim-ros2
 ```
 
 ## Add a package
