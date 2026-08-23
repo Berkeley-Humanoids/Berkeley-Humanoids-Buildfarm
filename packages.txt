@@ -33,10 +33,6 @@ recipes/libethercat
 # deps/ethercat_generic_cia402_drive
 # deps/ethercat_driver_ros2
 
-# --- gamepad teleoperation ---
-deps/teleop_tools_msgs
-deps/joy_teleop
-
 # --- MuJoCo simulation ---
 # mujoco_ament downloads the MuJoCo archive during the build, so the build needs
 # network access. rattler-build permits this.
